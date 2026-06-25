@@ -44,7 +44,7 @@ class GoogleMapsProvider:
         self._api_key = settings.google_maps_api_key
         self._limit = settings.google_maps_import_limit
 
-    def search(self, keyword: str, location: str, radius_km: int = 0) -> list[ProviderLead]:
+    def search(self, keyword: str, location: str, radius_km: int = 0, language_code: str = "en") -> list[ProviderLead]:
         if not self._api_key:
             raise LeadProviderError(
                 "GOOGLE_MAPS_API_KEY is not configured. "
@@ -70,7 +70,7 @@ class GoogleMapsProvider:
                     radius_m, radius_km, lat, lng,
                 )
 
-        raw_results = self._fetch_all(keyword=keyword, location=location, location_bias=location_bias)
+        raw_results = self._fetch_all(keyword=keyword, location=location, location_bias=location_bias, language_code=language_code)
         leads = [
             lead
             for raw in raw_results
@@ -98,7 +98,7 @@ class GoogleMapsProvider:
             logger.warning("GoogleMaps: geocoding failed for %r — %s", location, exc)
         return None
 
-    def _fetch_all(self, *, keyword: str, location: str, location_bias: dict[str, Any] | None = None) -> list[dict[str, Any]]:
+    def _fetch_all(self, *, keyword: str, location: str, location_bias: dict[str, Any] | None = None, language_code: str = "en") -> list[dict[str, Any]]:
         """Fetches results, following nextPageToken until limit is reached."""
         all_results: list[dict[str, Any]] = []
         page_token: str | None = None
@@ -115,7 +115,7 @@ class GoogleMapsProvider:
                 body: dict[str, Any] = {
                     "textQuery": f"{keyword.strip()} in {location.strip()}",
                     "maxResultCount": min(20, self._limit - len(all_results)),
-                    "languageCode": "en",
+                    "languageCode": language_code,
                 }
                 if location_bias:
                     body["locationBias"] = location_bias

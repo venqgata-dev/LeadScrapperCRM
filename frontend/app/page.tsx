@@ -80,23 +80,185 @@ const NEIGHBOR_CITIES: Record<string, string[]> = {
   Burgas:      ["Nesebar", "Aytos", "Pomorie", "Sredets"],
 };
 
-const UK_CATEGORIES = [
-  "Window Cleaner", "Gardener", "Handyman", "Carpet Cleaner",
-  "Mobile Mechanic", "Dog Groomer",
-  "Plumber", "Electrician", "Roofer", "Builder", "Painter & Decorator",
-  "Locksmith", "Plasterer", "Carpenter", "Landscaper",
-  "Restaurant", "Cafe", "Hair Salon", "Beauty Salon", "Barber",
-  "Auto Repair", "Mechanic", "Car Wash",
-  "Dentist", "Accountant", "Solicitor", "Estate Agent",
-  "Cleaning Services", "Gym", "Physio",
-] as const;
+// ─── Category groups ──────────────────────────────────────────────────────────
 
-const BULGARIA_CATEGORIES = [
-  "Фризьор", "Козметичен салон", "Автосервиз", "Ключар",
-  "Озеленяване", "Почистване", "Майстор", "ВиК услуги",
-  "Plumber", "Electrician", "Builder", "Restaurant", "Hotel",
-  "Dentist", "Accountant",
-] as const;
+const ALL_GROUP_PREFIX = "__ALL__";
+
+interface CategoryGroup {
+  group: string;
+  key: string;
+  categories: string[];
+}
+
+const UK_CATEGORY_GROUPS: CategoryGroup[] = [
+  {
+    group: "Home Services", key: "home_services",
+    categories: [
+      "Plumber", "Emergency Plumber", "Boiler Repair", "Gas Engineer",
+      "Heating Engineer", "Electrician", "Emergency Electrician",
+      "Builder", "Bricklayer", "Roofer", "Carpenter", "Joiner",
+      "Kitchen Fitter", "Bathroom Installer", "Painter & Decorator",
+      "Plasterer", "Tiler", "Flooring Contractor",
+      "Landscaper", "Gardener", "Tree Surgeon", "Fencing Contractor",
+      "Driveway Contractor", "Window Cleaner", "Gutter Cleaning",
+      "Pressure Washing", "Chimney Sweep", "Locksmith", "Handyman",
+      "Pest Control", "Conservatory Builder", "Patio Layer",
+      "Roof Cleaning", "HVAC Engineer",
+    ],
+  },
+  {
+    group: "Automotive", key: "automotive",
+    categories: [
+      "Mechanic", "Mobile Mechanic", "Auto Repair", "Car Wash",
+      "Car Detailing", "Mobile Valeting", "MOT Centre", "Tyre Shop",
+      "Motorcycle Repair", "Body Shop", "Windscreen Repair", "Van Hire",
+    ],
+  },
+  {
+    group: "Beauty & Wellness", key: "beauty",
+    categories: [
+      "Hair Salon", "Barber", "Beauty Salon", "Nail Salon",
+      "Tattoo Studio", "Massage Therapist", "Spa", "Cosmetic Clinic",
+      "Eyebrow Threading", "Tanning Studio",
+    ],
+  },
+  {
+    group: "Food & Hospitality", key: "food",
+    categories: [
+      "Restaurant", "Cafe", "Bakery", "Pizza", "Coffee Shop",
+      "Fish & Chips", "Pub", "Bar", "Chinese Takeaway",
+      "Indian Restaurant", "Italian Restaurant", "Turkish Restaurant",
+      "Sushi Restaurant", "Vegan Cafe", "Hotel", "Bed & Breakfast", "Takeaway",
+    ],
+  },
+  {
+    group: "Professional Services", key: "professional",
+    categories: [
+      "Accountant", "Solicitor", "Estate Agent", "Mortgage Broker",
+      "Insurance Broker", "Financial Advisor", "Architect", "Surveyor",
+      "IT Support", "Marketing Agency", "Web Designer",
+      "Graphic Designer", "PR Agency",
+    ],
+  },
+  {
+    group: "Education", key: "education",
+    categories: [
+      "Driving School", "Tutor", "Nursery", "Music School",
+      "Language School", "Dance School",
+    ],
+  },
+  {
+    group: "Health & Medical", key: "health",
+    categories: [
+      "Dentist", "Physiotherapist", "Chiropractor", "Optician",
+      "Pharmacy", "Osteopath", "Psychologist", "Counsellor",
+      "Nutritionist", "Acupuncturist", "Massage Clinic", "Hypnotherapist",
+    ],
+  },
+  {
+    group: "Pets", key: "pets",
+    categories: [
+      "Dog Groomer", "Veterinary Clinic", "Pet Shop",
+      "Dog Walker", "Dog Trainer",
+    ],
+  },
+  {
+    group: "Fitness", key: "fitness",
+    categories: [
+      "Gym", "Personal Trainer", "Yoga Studio", "Pilates Studio",
+      "Boxing Club", "Martial Arts", "CrossFit", "Swimming School",
+    ],
+  },
+  {
+    group: "Cleaning", key: "cleaning",
+    categories: [
+      "Cleaning Services", "Carpet Cleaner", "End of Tenancy Cleaning",
+      "Oven Cleaning", "Commercial Cleaning",
+    ],
+  },
+  {
+    group: "Construction & Improvement", key: "construction",
+    categories: [
+      "Skip Hire", "Scaffolding", "CCTV Installation", "Alarm Installer",
+      "Double Glazing", "Loft Conversion", "Extension Builder",
+      "Garage Conversion", "Solar Panels",
+    ],
+  },
+  {
+    group: "Events & Photography", key: "events",
+    categories: [
+      "Wedding Photographer", "Event Planner", "Catering",
+      "Wedding Venue", "DJ", "Videographer", "Party Planner",
+      "Photo Booth Hire",
+    ],
+  },
+  {
+    group: "Retail", key: "retail",
+    categories: [
+      "Jeweller", "Florist", "Furniture Shop",
+      "Clothing Boutique", "Gift Shop", "Antiques Shop", "Bookshop",
+    ],
+  },
+];
+
+const BULGARIA_CATEGORY_GROUPS: CategoryGroup[] = [
+  {
+    group: "Home Services", key: "home_services",
+    categories: [
+      "ВиК", "Водопроводчик", "Електротехник", "Ел услуги",
+      "Строителни услуги", "Строителна фирма", "Майстор",
+      "Покриви", "Дограма", "Гипсокартон",
+      "Боядисване", "Теракот", "Озеленяване",
+      "Почистване", "Миене на прозорци",
+    ],
+  },
+  {
+    group: "Automotive", key: "automotive",
+    categories: [
+      "Автосервиз", "Автомивка", "Автокозметика", "Детайлинг", "Гуми",
+    ],
+  },
+  {
+    group: "Beauty & Wellness", key: "beauty",
+    categories: [
+      "Фризьор", "Бръснар", "Маникюр", "Козметик", "Масаж", "Спа център",
+    ],
+  },
+  {
+    group: "Food & Hospitality", key: "food",
+    categories: [
+      "Ресторант", "Пицария", "Кафене", "Сладкарница", "Пекарна",
+    ],
+  },
+  {
+    group: "Health & Medical", key: "health",
+    categories: [
+      "Зъболекар", "Физиотерапия", "Оптика", "Аптека",
+    ],
+  },
+  {
+    group: "Professional Services", key: "professional",
+    categories: [
+      "Счетоводител", "Адвокат", "Имоти", "Застраховател",
+    ],
+  },
+  {
+    group: "Fitness", key: "fitness",
+    categories: ["Фитнес", "Йога"],
+  },
+  {
+    group: "Pets", key: "pets",
+    categories: ["Ветеринар", "Зоомагазин"],
+  },
+];
+
+function getGroupCategories(groupKey: string, groups: CategoryGroup[]): string[] {
+  return groups.find((g) => g.key === groupKey)?.categories ?? [];
+}
+
+function getGroupDisplayName(groupKey: string, groups: CategoryGroup[]): string {
+  return groups.find((g) => g.key === groupKey)?.group ?? groupKey;
+}
 
 const STATUS_ORDER: Record<WebsiteStatus, number> = {
   NO_WEBSITE: 0, FACEBOOK_ONLY: 1, FREE_BUILDER: 2, BROKEN_WEBSITE: 3, HAS_WEBSITE: 4,
@@ -170,7 +332,7 @@ export default function LeadFinderPage() {
   const [city, setCity] = useState("");
   const [searchMode, setSearchMode] = useState<"city" | "small_towns" | "both">("city");
   const [selectedTowns, setSelectedTowns] = useState<Set<string>>(new Set());
-  const [category, setCategory] = useState("Window Cleaner");
+  const [category, setCategory] = useState(UK_CATEGORY_GROUPS[0]?.categories[0] ?? "");
   const [customCategory, setCustomCategory] = useState("");
   const [source, setSource] = useState<"google_maps" | "yell" | "thomson_local" | "cylex" | "freeindex" | "csv">("google_maps");
   const [radiusKm, setRadiusKm] = useState(0);
@@ -200,8 +362,9 @@ export default function LeadFinderPage() {
     fetchStats().then(setStats).catch(() => null);
   }, []);
 
-  const categories = country === "Bulgaria" ? BULGARIA_CATEGORIES : UK_CATEGORIES;
+  const categoryGroups = country === "Bulgaria" ? BULGARIA_CATEGORY_GROUPS : UK_CATEGORY_GROUPS;
   const effectiveCategory = category === "Custom" ? customCategory : category;
+  const isGroupSearch = effectiveCategory.startsWith(ALL_GROUP_PREFIX);
   const cityList = MAJOR_CITIES[country] ?? [];
   const smallTownList = SMALL_TOWNS[country] ?? [];
   const neighborPreview = city ? (NEIGHBOR_CITIES[city] ?? []) : [];
@@ -211,8 +374,8 @@ export default function LeadFinderPage() {
     if (!MAJOR_CITIES[c]?.includes(city)) setCity("");
     const ukOnlySources = ["yell", "thomson_local", "cylex", "freeindex"];
     if (c === "Bulgaria" && ukOnlySources.includes(source)) setSource("google_maps");
-    const cats = c === "Bulgaria" ? BULGARIA_CATEGORIES : UK_CATEGORIES;
-    setCategory(cats[0]);
+    const groups = c === "Bulgaria" ? BULGARIA_CATEGORY_GROUPS : UK_CATEGORY_GROUPS;
+    setCategory(groups[0]?.categories[0] ?? "");
     setSelectedTowns(new Set());
     setExpandNeighbors(false);
   }
@@ -269,33 +432,52 @@ export default function LeadFinderPage() {
         const cities = getCitiesToSearch();
         const isSingleCity = cities.length === 1;
 
-        // Run all city searches in parallel
-        const cityResponses = await Promise.all(
-          cities.map((c) =>
+        // Determine which categories to search
+        const groupKey = isGroupSearch
+          ? effectiveCategory.slice(ALL_GROUP_PREFIX.length)
+          : null;
+        const categoriesToSearch: string[] = isGroupSearch
+          ? getGroupCategories(groupKey!, categoryGroups)
+          : [effectiveCategory.trim()];
+
+        if (categoriesToSearch.length === 0) {
+          setSearchError("No categories found for this group.");
+          return;
+        }
+
+        // Build all (city × category) pairs and run in parallel.
+        // For group searches disable keyword expansion (breadth already covered
+        // by multiple categories) and neighbor expansion (user chose cities).
+        const pairs = cities.flatMap((c) =>
+          categoriesToSearch.map((cat) => ({ city: c, cat }))
+        );
+
+        const allResponses = await Promise.all(
+          pairs.map(({ city: c, cat }) =>
             searchLeads({
               country,
               city: c,
-              category: effectiveCategory.trim(),
+              category: cat,
               provider: source,
               radius_km: source === "google_maps" ? radiusKm : 0,
-              // Only pass expand_neighbors for single-city mode; multi-city already explicit
-              expand_neighbors: isSingleCity ? expandNeighbors : false,
-              expand_keywords: expandKeywords,
+              expand_neighbors: isGroupSearch ? false : (isSingleCity ? expandNeighbors : false),
+              expand_keywords: isGroupSearch ? false : expandKeywords,
             })
           )
         );
 
-        // Merge analytics across city responses
-        const allLeads = cityResponses.flatMap((r) => r.leads);
+        const allLeads = allResponses.flatMap((r) => r.leads);
         data = deduplicateLeads(allLeads);
 
         // Aggregate analytics
-        const rawTotal = cityResponses.reduce((s, r) => s + r.analytics.raw_count, 0);
-        const allCities = [...new Set(cityResponses.flatMap((r) => r.analytics.cities_searched))];
-        const allKeywords = cityResponses[0]?.analytics.keywords_used ?? [];
-        const noWebsite = data.filter((l) => l.website_status === "NO_WEBSITE").length;
+        const rawTotal = allResponses.reduce((s, r) => s + r.analytics.raw_count, 0);
+        const allCities = [...new Set(allResponses.flatMap((r) => r.analytics.cities_searched))];
+        const allKeywords = isGroupSearch
+          ? categoriesToSearch
+          : (allResponses[0]?.analytics.keywords_used ?? []);
+        const noWebsite   = data.filter((l) => l.website_status === "NO_WEBSITE").length;
         const facebookOnly = data.filter((l) => l.website_status === "FACEBOOK_ONLY").length;
-        const freeBuilder = data.filter((l) => l.website_status === "FREE_BUILDER").length;
+        const freeBuilder  = data.filter((l) => l.website_status === "FREE_BUILDER").length;
 
         mergedAnalytics = {
           raw_count: rawTotal,
@@ -325,7 +507,10 @@ export default function LeadFinderPage() {
       const rate = data.length > 0 ? Math.round((opps / data.length) * 100) : 0;
       if (data.length > 0 && source !== "csv") {
         const cities = getCitiesToSearch();
-        const label = `${cities.join(" + ")} / ${effectiveCategory}`;
+        const displayCat = isGroupSearch
+          ? `All ${getGroupDisplayName(effectiveCategory.slice(ALL_GROUP_PREFIX.length), categoryGroups)}`
+          : effectiveCategory;
+        const label = `${cities.join(" + ")} / ${displayCat}`;
         setLeaderboard((prev) => {
           const next = [
             ...prev.filter((e) => e.label !== label),
@@ -650,7 +835,16 @@ export default function LeadFinderPage() {
                     onChange={(e) => setCategory(e.target.value)}
                     className="flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    {categories.map((c) => <option key={c} value={c}>{c}</option>)}
+                    {categoryGroups.map((group) => (
+                      <optgroup key={group.key} label={`── ${group.group}`}>
+                        <option value={`${ALL_GROUP_PREFIX}${group.key}`}>
+                          ⚡ All {group.group} ({group.categories.length} types)
+                        </option>
+                        {group.categories.map((c) => (
+                          <option key={c} value={c}>{c}</option>
+                        ))}
+                      </optgroup>
+                    ))}
                     <option value="Custom">Custom…</option>
                   </select>
                   {category === "Custom" && (
@@ -667,16 +861,19 @@ export default function LeadFinderPage() {
 
                 {/* Keyword expansion toggle */}
                 <div className="mt-2">
-                  <label className="flex cursor-pointer items-center gap-2 text-sm">
+                  <label className={`flex cursor-pointer items-center gap-2 text-sm ${isGroupSearch ? "opacity-40" : ""}`}>
                     <input
                       type="checkbox"
-                      checked={expandKeywords}
+                      checked={expandKeywords && !isGroupSearch}
                       onChange={(e) => setExpandKeywords(e.target.checked)}
+                      disabled={isGroupSearch}
                       className="accent-blue-600"
                     />
                     <Zap className="h-3.5 w-3.5 text-amber-500" />
                     <span className="font-medium text-slate-700">Expand keywords</span>
-                    <span className="text-xs text-slate-400">(5–10 related terms)</span>
+                    <span className="text-xs text-slate-400">
+                      {isGroupSearch ? "(disabled for group search)" : "(5–10 related terms)"}
+                    </span>
                   </label>
                 </div>
               </div>
@@ -717,6 +914,8 @@ export default function LeadFinderPage() {
             <p className="text-sm text-slate-400">
               {source === "csv"
                 ? "Classifying rows…"
+                : isGroupSearch
+                ? `Searching all ${getGroupDisplayName(effectiveCategory.slice(ALL_GROUP_PREFIX.length), categoryGroups)} categories — may take a minute…`
                 : searchMode !== "city" && selectedTowns.size > 1
                 ? `Searching ${getCitiesToSearch().length} cities in parallel…`
                 : expandNeighbors && neighborPreview.length > 0

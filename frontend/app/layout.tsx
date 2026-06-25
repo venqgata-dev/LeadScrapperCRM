@@ -33,18 +33,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
                 <span className="mx-2 text-slate-200">|</span>
 
-                <span className="mr-1 text-xs font-medium text-slate-400 uppercase tracking-wider whitespace-nowrap">CRM</span>
                 <a
                   href="/crm"
                   className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors whitespace-nowrap"
                 >
                   Dashboard
-                </a>
-                <a
-                  href="/pipeline"
-                  className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors whitespace-nowrap"
-                >
-                  Pipeline
                 </a>
                 <a
                   href="/leads"
@@ -53,10 +46,31 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   Leads
                 </a>
                 <a
+                  href="/opportunities"
+                  className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors whitespace-nowrap"
+                >
+                  Opportunities
+                </a>
+                <a
                   href="/call-list"
                   className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors whitespace-nowrap"
                 >
-                  Call List
+                  Call Queue
+                </a>
+                <a
+                  href="/pipeline"
+                  className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors whitespace-nowrap"
+                >
+                  Pipeline
+                </a>
+
+                <span className="mx-2 text-slate-200">|</span>
+
+                <a
+                  href="/settings"
+                  className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors whitespace-nowrap"
+                >
+                  Settings
                 </a>
               </nav>
 
