@@ -40,6 +40,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   Dashboard
                 </a>
                 <a
+                  href="/campaigns"
+                  className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors whitespace-nowrap"
+                >
+                  Campaigns
+                </a>
+                <a
                   href="/leads"
                   className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors whitespace-nowrap"
                 >

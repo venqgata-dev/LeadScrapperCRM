@@ -80,7 +80,8 @@
       "PowerShell(Invoke-RestMethod -Uri \"http://localhost:8000/cloudtalk/test\" -Method POST -TimeoutSec 15)",
       "PowerShell(Invoke-RestMethod -Uri \"http://localhost:8000/cloudtalk/sync-contact/1\" -Method POST -TimeoutSec 20)",
       "PowerShell(Invoke-RestMethod -Uri \"http://localhost:8000/cloudtalk/calls/1\" -TimeoutSec 10)",
-      "PowerShell(docker compose exec -T backend python -c \"from app.core.config import get_settings; s = get_settings\\(\\); print\\(f'agent_id={s.cloudtalk_agent_id}'\\)\")"
+      "PowerShell(docker compose exec -T backend python -c \"from app.core.config import get_settings; s = get_settings\\(\\); print\\(f'agent_id={s.cloudtalk_agent_id}'\\)\")",
+      "PowerShell(docker compose exec -T postgres psql -U postgres -d leadcrm -c \"\\\\dt search_campaigns\" 2>&1)"
     ]
   }
 }
