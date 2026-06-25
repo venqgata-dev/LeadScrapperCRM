@@ -1,0 +1,19 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Frontend (Next.js dev)",
+      "runtimeExecutable": "C:\\Users\\User\\AppData\\Local\\OpenAI\\Codex\\runtimes\\cua_node\\a89897d3d9baa117\\bin\\node.exe",
+      "runtimeArgs": ["node_modules\\next\\dist\\bin\\next", "dev", "--port", "3000"],
+      "cwd": "frontend",
+      "port": 3000
+    },
+    {
+      "name": "Backend (FastAPI / uvicorn)",
+      "runtimeExecutable": "docker",
+      "runtimeArgs": ["compose", "up", "backend"],
+      "cwd": ".",
+      "port": 8000
+    }
+  ]
+}

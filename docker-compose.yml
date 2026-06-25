@@ -1,0 +1,67 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-leadcrm}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      leadcrm:
+        aliases:
+          - postgres
+          - leadcrm-postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/leadcrm}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+      GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY:-}
+      GOOGLE_MAPS_IMPORT_LIMIT: ${GOOGLE_MAPS_IMPORT_LIMIT:-20}
+      OUTSCRAPER_API_KEY: ${OUTSCRAPER_API_KEY:-}
+      OUTSCRAPER_BASE_URL: ${OUTSCRAPER_BASE_URL:-https://api.app.outscraper.com}
+      OUTSCRAPER_IMPORT_LIMIT: ${OUTSCRAPER_IMPORT_LIMIT:-50}
+      CORS_ORIGINS: ${CORS_ORIGINS:-["http://localhost:3000","http://127.0.0.1:3000"]}
+    ports:
+      - "8000:8000"
+    networks:
+      - leadcrm
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    ports:
+      - "3000:3000"
+    networks:
+      - leadcrm
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+
+networks:
+  leadcrm:
+    driver: bridge
