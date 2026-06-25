@@ -10,11 +10,15 @@ import {
   addNote,
   fetchNotes,
   discoverEmail,
+  syncCloudTalkContact,
+  initiateCloudTalkCall,
+  fetchCloudTalkCalls,
   type Business,
   type ContactStatus,
   type CallLog,
   type BusinessNote,
   type CallOutcome,
+  type CloudTalkCallRecord,
 } from "@/lib/api";
 import { WebsiteStatusBadge } from "@/components/WebsiteStatusBadge";
 import { ContactStatusBadge } from "@/components/ContactStatusBadge";
@@ -29,6 +33,7 @@ import {
   ArrowLeft, Star, Phone, Mail, Globe, MapPin, Tag,
   PhoneCall, PhoneMissed, PhoneOff, Voicemail,
   MessageSquare, Calendar, DollarSign, CheckCircle2,
+  PhoneOutgoing, Clock, Mic,
 } from "lucide-react";
 
 const CALL_OUTCOME_LABELS: Record<CallOutcome, string> = {
@@ -72,6 +77,12 @@ export default function LeadDetailPage() {
 
   const [discoveringEmail, setDiscoveringEmail] = useState(false);
 
+  // CloudTalk state
+  const [ctCalls, setCtCalls] = useState<CloudTalkCallRecord[]>([]);
+  const [ctCalling, setCtCalling] = useState(false);
+  const [ctCallMessage, setCtCallMessage] = useState<string | null>(null);
+  const [ctCallError, setCtCallError] = useState<string | null>(null);
+
   // Log call state
   const [showCallForm, setShowCallForm] = useState(false);
   const [callOutcome, setCallOutcome] = useState<CallOutcome | "">("");
@@ -80,14 +91,16 @@ export default function LeadDetailPage() {
 
   const load = useCallback(async () => {
     try {
-      const [b, c, n] = await Promise.all([
+      const [b, c, n, cc] = await Promise.all([
         fetchBusiness(bId),
         fetchCalls(bId),
         fetchNotes(bId),
+        fetchCloudTalkCalls(bId),
       ]);
       setBusiness(b);
       setCalls(c);
       setNotes(n);
+      setCtCalls(cc);
       setContactStatus(b.contact_status as ContactStatus);
       setDealValue(b.deal_value != null ? String(b.deal_value) : "");
       setFollowUpDate(b.follow_up_date ? b.follow_up_date.split("T")[0] : "");
@@ -139,6 +152,35 @@ export default function LeadDetailPage() {
       setError(String(e));
     } finally {
       setDiscoveringEmail(false);
+    }
+  }
+
+  async function handleCloudTalkCall() {
+    if (!business) return;
+    setCtCalling(true);
+    setCtCallMessage(null);
+    setCtCallError(null);
+    try {
+      // Sync contact first if not linked
+      if (!business.cloudtalk_contact_id) {
+        try {
+          await syncCloudTalkContact(business.id);
+        } catch {
+          // non-fatal — will proceed with phone-only call
+        }
+      }
+      const result = await initiateCloudTalkCall(business.id);
+      setCtCallMessage(result.message);
+      // Refresh CloudTalk calls list
+      const updated = await fetchCloudTalkCalls(business.id);
+      setCtCalls(updated);
+      // Refresh business to pick up last_call_id / cloudtalk_contact_id
+      const refreshed = await fetchBusiness(business.id);
+      setBusiness(refreshed);
+    } catch (e) {
+      setCtCallError(String(e));
+    } finally {
+      setCtCalling(false);
     }
   }
 
@@ -264,6 +306,17 @@ export default function LeadDetailPage() {
             )}
 
             <div className="mt-4 flex flex-wrap gap-2">
+              {business.phone && (
+                <button
+                  type="button"
+                  onClick={handleCloudTalkCall}
+                  disabled={ctCalling}
+                  className="flex items-center gap-1.5 rounded-lg border border-green-300 bg-green-50 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-100 disabled:opacity-50 transition-colors"
+                >
+                  <PhoneOutgoing className="h-3.5 w-3.5" />
+                  {ctCalling ? "Calling…" : "☎ Call via CloudTalk"}
+                </button>
+              )}
               {business.google_maps_url && (
                 <a href={business.google_maps_url} target="_blank" rel="noopener noreferrer"
                   className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50">
@@ -277,6 +330,18 @@ export default function LeadDetailPage() {
                 </a>
               )}
             </div>
+
+            {/* CloudTalk call feedback */}
+            {ctCallMessage && (
+              <div className="mt-3 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">
+                {ctCallMessage}
+              </div>
+            )}
+            {ctCallError && (
+              <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                {ctCallError}
+              </div>
+            )}
           </div>
 
           {/* Call history */}
@@ -374,6 +439,58 @@ export default function LeadDetailPage() {
               </div>
             )}
           </div>
+
+          {/* CloudTalk call history */}
+          {ctCalls.length > 0 && (
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <h2 className="mb-3 text-sm font-semibold text-slate-700 flex items-center gap-2">
+                <PhoneOutgoing className="h-4 w-4 text-green-500" />
+                CloudTalk Calls
+                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">{ctCalls.length}</span>
+              </h2>
+              <div className="space-y-2">
+                {ctCalls.map((c) => (
+                  <div key={c.id} className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2.5 space-y-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                          c.direction === "INBOUND"
+                            ? "bg-blue-100 text-blue-700"
+                            : "bg-green-100 text-green-700"
+                        }`}>
+                          {c.direction}
+                        </span>
+                        <span className="text-xs text-slate-600">{c.status}</span>
+                        {c.duration != null && (
+                          <span className="flex items-center gap-1 text-xs text-slate-400">
+                            <Clock className="h-3 w-3" />
+                            {Math.floor(c.duration / 60)}m {c.duration % 60}s
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-xs text-slate-400 shrink-0">
+                        {c.started_at ? new Date(c.started_at).toLocaleString() : new Date(c.created_at).toLocaleString()}
+                      </span>
+                    </div>
+                    {c.agent && (
+                      <p className="text-xs text-slate-500">Agent: {c.agent}</p>
+                    )}
+                    {c.recording_url && (
+                      <a
+                        href={c.recording_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-xs text-blue-600 hover:underline"
+                      >
+                        <Mic className="h-3 w-3" />
+                        Listen to recording
+                      </a>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Notes history */}
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">

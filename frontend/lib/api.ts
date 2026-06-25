@@ -37,6 +37,9 @@ export interface Business {
   last_contacted: string | null;
   opportunity_reason: string | null;
   notes: string | null;
+  // CloudTalk fields
+  cloudtalk_contact_id: string | null;
+  last_call_id: string | null;
   // Sales pipeline fields
   deal_value: number | null;
   follow_up_date: string | null;
@@ -420,4 +423,61 @@ export async function importCsv(file: File): Promise<ImportResult> {
     throw new Error(`API ${res.status}: ${text}`);
   }
   return res.json() as Promise<ImportResult>;
+}
+
+// ---------------------------------------------------------------------------
+// CloudTalk
+// ---------------------------------------------------------------------------
+
+export interface CloudTalkStatus {
+  configured: boolean;
+  connected: boolean;
+  account_info: Record<string, unknown> | null;
+  error: string | null;
+}
+
+export interface CloudTalkContactSync {
+  cloudtalk_contact_id: string;
+  created: boolean;
+}
+
+export interface CloudTalkCallInitiate {
+  cloudtalk_call_id: string | null;
+  message: string;
+}
+
+export interface CloudTalkCallRecord {
+  id: number;
+  business_id: number;
+  cloudtalk_call_id: string | null;
+  direction: string;
+  status: string;
+  duration: number | null;
+  started_at: string | null;
+  ended_at: string | null;
+  recording_url: string | null;
+  agent: string | null;
+  created_at: string;
+}
+
+export async function fetchCloudTalkStatus(): Promise<CloudTalkStatus> {
+  return apiFetch<CloudTalkStatus>("/cloudtalk/status");
+}
+
+export async function testCloudTalkConnection(): Promise<CloudTalkStatus> {
+  return apiFetch<CloudTalkStatus>("/cloudtalk/test", { method: "POST" });
+}
+
+export async function syncCloudTalkContact(businessId: number): Promise<CloudTalkContactSync> {
+  return apiFetch<CloudTalkContactSync>(`/cloudtalk/sync-contact/${businessId}`, { method: "POST" });
+}
+
+export async function initiateCloudTalkCall(businessId: number): Promise<CloudTalkCallInitiate> {
+  return apiFetch<CloudTalkCallInitiate>(`/cloudtalk/call/${businessId}`, { method: "POST" });
+}
+
+export async function fetchCloudTalkCalls(businessId: number): Promise<CloudTalkCallRecord[]> {
+  const raw = await apiFetch<unknown>(`/cloudtalk/calls/${businessId}`);
+  if (!Array.isArray(raw)) return [];
+  return raw as CloudTalkCallRecord[];
 }

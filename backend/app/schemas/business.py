@@ -30,6 +30,9 @@ class BusinessRead(BaseModel):
     website_checked_at: datetime | None = None
     opportunity_reason: str | None = None
     notes: str | None = None
+    # CloudTalk fields
+    cloudtalk_contact_id: str | None = None
+    last_call_id: str | None = None
     # Sales pipeline fields
     deal_value: Decimal | None = None
     follow_up_date: datetime | None = None

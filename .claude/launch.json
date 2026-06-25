@@ -4,9 +4,10 @@
     {
       "name": "Frontend (Next.js dev)",
       "runtimeExecutable": "C:\\Users\\User\\AppData\\Local\\OpenAI\\Codex\\runtimes\\cua_node\\a89897d3d9baa117\\bin\\node.exe",
-      "runtimeArgs": ["node_modules\\next\\dist\\bin\\next", "dev", "--port", "3000"],
+      "runtimeArgs": ["node_modules\\next\\dist\\bin\\next", "dev", "--port", "3001"],
       "cwd": "frontend",
-      "port": 3000
+      "port": 3001,
+      "autoPort": false
     },
     {
       "name": "Backend (FastAPI / uvicorn)",

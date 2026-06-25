@@ -21,6 +21,9 @@ class Settings(BaseSettings):
         validation_alias="OUTSCRAPER_BASE_URL",
     )
     outscraper_import_limit: int = Field(default=50, validation_alias="OUTSCRAPER_IMPORT_LIMIT")
+    cloudtalk_api_key: str | None = Field(default=None, validation_alias="CLOUDTALK_API_KEY")
+    # Agent ID that the CRM uses to initiate outbound calls (required for POST /calls/create.json)
+    cloudtalk_agent_id: int | None = Field(default=None, validation_alias="CLOUDTALK_AGENT_ID")
 
     model_config = SettingsConfigDict(
         env_file=".env",

@@ -59,6 +59,10 @@ class Business(Base):
     opportunity_reason: Mapped[str | None] = mapped_column(String(255), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
+    # CloudTalk integration fields (added in migration 202606250001)
+    cloudtalk_contact_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    last_call_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+
     # Sales pipeline fields (added in migration 202606240002)
     deal_value: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True, index=True)
     follow_up_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, index=True)
@@ -83,6 +87,9 @@ class Business(Base):
     )
     note_history: Mapped[list["BusinessNote"]] = relationship(
         "BusinessNote", back_populates="business", cascade="all, delete-orphan", order_by="BusinessNote.created_at.desc()"
+    )
+    cloudtalk_calls: Mapped[list["CloudTalkCall"]] = relationship(
+        "CloudTalkCall", back_populates="business", cascade="all, delete-orphan", order_by="CloudTalkCall.created_at.desc()"
     )
 
 
@@ -118,3 +125,25 @@ class BusinessNote(Base):
     )
 
     business: Mapped["Business"] = relationship("Business", back_populates="note_history")
+
+
+class CloudTalkCall(Base):
+    __tablename__ = "cloudtalk_calls"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    business_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("businesses.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    cloudtalk_call_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    direction: Mapped[str] = mapped_column(String(16), nullable=False, default="OUTBOUND")
+    status: Mapped[str] = mapped_column(String(32), nullable=False, default="")
+    duration: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    recording_url: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+    agent: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False, index=True
+    )
+
+    business: Mapped["Business"] = relationship("Business", back_populates="cloudtalk_calls")

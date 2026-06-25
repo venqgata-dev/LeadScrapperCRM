@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.core.enums import WebsiteStatus
 from app.models.business import Business
 from app.providers.base import ProviderLead
-from app.providers.localization import expand_keywords
+from app.providers.localization import expand_keywords, get_language_code
 from app.providers.neighbors import get_neighbors
 from app.providers.registry import get_lead_provider
 from app.schemas.business import LeadImportResponse, SearchAnalytics, SearchResponse, SearchResultLead
@@ -196,6 +196,7 @@ def search_leads(
     from collections import Counter
 
     provider = get_lead_provider(source)
+    language_code = get_language_code(country)
 
     # --- Keyword list ---
     if use_keyword_expansion:
@@ -226,8 +227,11 @@ def search_leads(
 
     for loc in locations:
         for kw in keywords:
-            if radius_km > 0 and source == "google_maps":
-                provider_leads = provider.search(keyword=kw, location=loc, radius_km=radius_km)  # type: ignore[call-arg]
+            if source == "google_maps":
+                kwargs: dict = {"language_code": language_code}
+                if radius_km > 0:
+                    kwargs["radius_km"] = radius_km
+                provider_leads = provider.search(keyword=kw, location=loc, **kwargs)  # type: ignore[call-arg]
             else:
                 provider_leads = provider.search(keyword=kw, location=loc)
 
