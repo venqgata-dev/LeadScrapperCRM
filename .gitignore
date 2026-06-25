@@ -35,3 +35,12 @@ Thumbs.db
 .idea/
 .vscode/
 *.swp
+
+# Claude
+.claude/settings.local.json
+
+# Local environment
+.env
+node_modules/
+.next/
+__pycache__/

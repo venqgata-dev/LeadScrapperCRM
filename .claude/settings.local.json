@@ -37,7 +37,9 @@
       "PowerShell($markets = Invoke-WebRequest -Uri \"http://localhost:8000/businesses/analytics/markets\" -UseBasicParsing | Select-Object -ExpandProperty Content | ConvertFrom-Json; $cats = Invoke-WebRequest -Uri \"http://localhost:8000/businesses/analytics/categories\" -UseBasicParsing | Select-Object -ExpandProperty Content | ConvertFrom-Json; $rev = Invoke-WebRequest -Uri \"http://localhost:8000/businesses/analytics/revenue-by-month\" -UseBasicParsing | Select-Object -ExpandProperty Content | ConvertFrom-Json; Write-Output \"markets is array: $\\($markets -is [System.Array]\\), count: $\\($markets.Count\\)\"; Write-Output \"categories is array: $\\($cats -is [System.Array]\\), count: $\\($cats.Count\\)\"; Write-Output \"revenue is array: $\\($rev -is [System.Array]\\), count: $\\($rev.Count\\)\")",
       "PowerShell(Start-Sleep -Seconds 2; $pages = @\\(\"http://localhost:3000\", \"http://localhost:3000/leads\", \"http://localhost:3000/crm\", \"http://localhost:3000/opportunities\", \"http://localhost:3000/pipeline\"\\); foreach \\($p in $pages\\) { try { $code = \\(Invoke-WebRequest -Uri $p -UseBasicParsing\\).StatusCode; Write-Output \"$p -> $code\" } catch { Write-Output \"$p -> ERROR: $_\" } })",
       "Bash(git init *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git config *)"
     ]
   }
 }
