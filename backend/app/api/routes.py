@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from app.api.v1.businesses import router as businesses_router
+from app.api.v1.campaigns import router as campaigns_router
 from app.api.v1.cloudtalk import router as cloudtalk_router
 from app.api.v1.csv_import import router as csv_import_router
 from app.api.v1.health import router as health_router
@@ -12,6 +13,7 @@ from app.api.v1.search import router as search_router
 api_router = APIRouter()
 api_router.include_router(health_router, tags=["health"])
 api_router.include_router(businesses_router, prefix="/businesses", tags=["businesses"])
+api_router.include_router(campaigns_router)
 api_router.include_router(cloudtalk_router, tags=["cloudtalk"])
 api_router.include_router(imports_router, tags=["imports"])
 api_router.include_router(csv_import_router, tags=["imports"])

@@ -481,3 +481,122 @@ export async function fetchCloudTalkCalls(businessId: number): Promise<CloudTalk
   if (!Array.isArray(raw)) return [];
   return raw as CloudTalkCallRecord[];
 }
+
+// ---------------------------------------------------------------------------
+// Campaigns
+// ---------------------------------------------------------------------------
+
+export type CampaignStatus = "Draft" | "Running" | "Paused" | "Completed" | "Failed" | "Cancelled";
+
+export interface CampaignProgressData {
+  current_city?: string;
+  cities_done?: number;
+  cities_total?: number;
+  results_so_far?: number;
+  api_requests_so_far?: number;
+  error?: string;
+}
+
+export interface Campaign {
+  id: number;
+  name: string;
+  country: string;
+  provider: string;
+  category: string;
+  category_group: string | null;
+  cities: string[];
+  search_type: string;
+  expand_keywords: boolean;
+  expand_neighbors: boolean;
+  auto_import: boolean;
+  status: CampaignStatus;
+  started_at: string | null;
+  completed_at: string | null;
+  duration_seconds: number | null;
+  raw_results: number;
+  deduped_results: number;
+  opportunities: number;
+  imported: number;
+  api_requests: number;
+  estimated_cost: number;
+  progress_data: CampaignProgressData | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CampaignCreate {
+  name: string;
+  country: string;
+  provider: string;
+  category: string;
+  category_group?: string | null;
+  cities: string[];
+  search_type: string;
+  expand_keywords: boolean;
+  expand_neighbors: boolean;
+  auto_import: boolean;
+}
+
+export interface CampaignStats {
+  total: number;
+  running: number;
+  completed: number;
+  businesses_found: number;
+  imported: number;
+  opportunities: number;
+  estimated_cost: number;
+}
+
+export interface DuplicateWarning {
+  is_duplicate: boolean;
+  similar_campaigns: Campaign[];
+  warning_message: string | null;
+}
+
+export async function fetchCampaigns(): Promise<Campaign[]> {
+  const raw = await apiFetch<unknown>("/campaigns");
+  if (!Array.isArray(raw)) return [];
+  return raw as Campaign[];
+}
+
+export async function fetchCampaignStats(): Promise<CampaignStats> {
+  return apiFetch<CampaignStats>("/campaigns/stats");
+}
+
+export async function fetchCampaign(id: number): Promise<Campaign> {
+  return apiFetch<Campaign>(`/campaigns/${id}`);
+}
+
+export async function createCampaign(payload: CampaignCreate): Promise<Campaign> {
+  return apiFetch<Campaign>("/campaigns", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function checkDuplicate(payload: CampaignCreate): Promise<DuplicateWarning> {
+  return apiFetch<DuplicateWarning>("/campaigns/check-duplicate", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function startCampaign(id: number): Promise<Campaign> {
+  return apiFetch<Campaign>(`/campaigns/${id}/start`, { method: "POST" });
+}
+
+export async function pauseCampaign(id: number): Promise<Campaign> {
+  return apiFetch<Campaign>(`/campaigns/${id}/pause`, { method: "POST" });
+}
+
+export async function resumeCampaign(id: number): Promise<Campaign> {
+  return apiFetch<Campaign>(`/campaigns/${id}/resume`, { method: "POST" });
+}
+
+export async function cancelCampaign(id: number): Promise<Campaign> {
+  return apiFetch<Campaign>(`/campaigns/${id}/cancel`, { method: "POST" });
+}
+
+export async function deleteCampaign(id: number): Promise<void> {
+  await apiFetch<void>(`/campaigns/${id}`, { method: "DELETE" });
+}
