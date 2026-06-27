@@ -61,21 +61,6 @@ class EmailTemplate(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
 
-class CallScript(Base):
-    __tablename__ = "call_scripts"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    business_id: Mapped[int] = mapped_column(Integer, ForeignKey("businesses.id", ondelete="CASCADE"), nullable=False, unique=True, index=True)
-    script_text: Mapped[str] = mapped_column(Text, nullable=False)
-    opening_line: Mapped[str | None] = mapped_column(Text, nullable=True)
-    pain_point_hook: Mapped[str | None] = mapped_column(Text, nullable=True)
-    value_proposition: Mapped[str | None] = mapped_column(Text, nullable=True)
-    call_to_action: Mapped[str | None] = mapped_column(Text, nullable=True)
-    generated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=True)
-
-    business: Mapped["Business"] = relationship("Business")  # type: ignore[name-defined]
-
 
 class FollowUp(Base):
     __tablename__ = "follow_ups"
