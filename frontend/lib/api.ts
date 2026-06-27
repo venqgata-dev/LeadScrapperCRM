@@ -46,6 +46,41 @@ export interface Business {
   proposal_sent_at: string | null;
   called_at: string | null;
   won_at: string | null;
+  // AI scoring
+  ai_score: number | null;
+  ai_priority: string | null;
+  ai_project_value: number | null;
+  ai_close_prob: number | null;
+  // Website analysis
+  website_platform: string | null;
+  website_health_score: number | null;
+  website_seo_score: number | null;
+  website_redesign_score: number | null;
+  website_load_time_ms: number | null;
+  website_cms: string | null;
+  website_mobile_friendly: boolean | null;
+  website_https: boolean | null;
+  website_has_analytics: boolean | null;
+  website_has_contact_form: boolean | null;
+  website_wordpress: boolean | null;
+  website_shopify: boolean | null;
+  website_wix: boolean | null;
+  website_last_analyzed: string | null;
+  redesign_reasons: string | null;
+  // Social
+  facebook_found: boolean | null;
+  instagram_found: boolean | null;
+  fb_followers: number | null;
+  ig_followers: number | null;
+  // Enrichment
+  enrichment_status: string | null;
+  last_enriched_at: string | null;
+  // Extra links
+  youtube_url: string | null;
+  tiktok_url: string | null;
+  whatsapp_url: string | null;
+  contact_form_url: string | null;
+  search_campaign_id: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -599,4 +634,175 @@ export async function cancelCampaign(id: number): Promise<Campaign> {
 
 export async function deleteCampaign(id: number): Promise<void> {
   await apiFetch<void>(`/campaigns/${id}`, { method: "DELETE" });
+}
+
+// ---------------------------------------------------------------------------
+// Sales Playbooks
+// ---------------------------------------------------------------------------
+
+export interface SalesPlaybook {
+  id: number;
+  name: string;
+  description: string | null;
+  applies_to: string[];
+  opening: string | null;
+  questions: string[];
+  pain_points: string[];
+  closing: string | null;
+  objection_handling: Record<string, string>;
+  is_default: boolean;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PlaybookCreate {
+  name: string;
+  description?: string;
+  applies_to?: string[];
+  opening?: string;
+  questions?: string[];
+  pain_points?: string[];
+  closing?: string;
+  objection_handling?: Record<string, string>;
+  is_active?: boolean;
+}
+
+export async function fetchPlaybooks(activeOnly = true): Promise<SalesPlaybook[]> {
+  const raw = await apiFetch<unknown>(`/playbooks?active_only=${activeOnly}`);
+  if (!Array.isArray(raw)) return [];
+  return raw as SalesPlaybook[];
+}
+
+export async function createPlaybook(payload: PlaybookCreate): Promise<SalesPlaybook> {
+  return apiFetch<SalesPlaybook>("/playbooks", { method: "POST", body: JSON.stringify(payload) });
+}
+
+export async function updatePlaybook(id: number, payload: Partial<PlaybookCreate>): Promise<SalesPlaybook> {
+  return apiFetch<SalesPlaybook>(`/playbooks/${id}`, { method: "PUT", body: JSON.stringify(payload) });
+}
+
+export async function deletePlaybook(id: number): Promise<void> {
+  await apiFetch<void>(`/playbooks/${id}`, { method: "DELETE" });
+}
+
+// ---------------------------------------------------------------------------
+// Meeting Notes
+// ---------------------------------------------------------------------------
+
+export interface MeetingNote {
+  id: number;
+  business_id: number;
+  summary: string | null;
+  requirements: string | null;
+  budget: string | null;
+  deadline: string | null;
+  competitors: string[];
+  decision_maker: string | null;
+  next_meeting: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function fetchMeetingNotes(businessId: number): Promise<MeetingNote | null> {
+  const raw = await apiFetch<unknown>(`/businesses/${businessId}/meeting-notes`);
+  return raw as MeetingNote | null;
+}
+
+export async function upsertMeetingNotes(businessId: number, payload: Partial<MeetingNote>): Promise<MeetingNote> {
+  return apiFetch<MeetingNote>(`/businesses/${businessId}/meeting-notes`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Competitor Snapshot
+// ---------------------------------------------------------------------------
+
+export interface CompetitorSnapshot {
+  id: number;
+  business_id: number;
+  main_competitors: string[];
+  notes: string | null;
+  strengths: string[];
+  weaknesses: string[];
+  opportunities: string[];
+  threats: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export async function fetchCompetitor(businessId: number): Promise<CompetitorSnapshot | null> {
+  const raw = await apiFetch<unknown>(`/businesses/${businessId}/competitor`);
+  return raw as CompetitorSnapshot | null;
+}
+
+export async function upsertCompetitor(businessId: number, payload: Partial<CompetitorSnapshot>): Promise<CompetitorSnapshot> {
+  return apiFetch<CompetitorSnapshot>(`/businesses/${businessId}/competitor`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Sales Insights
+// ---------------------------------------------------------------------------
+
+export interface SalesInsight {
+  id: number;
+  business_id: number;
+  overall_score: number;
+  priority: string;
+  pain_points: string[];
+  strengths: string[];
+  recommendations: string[];
+  recommended_services: string[];
+  recommended_pitch: string | null;
+  next_best_action: string | null;
+  estimated_project_value: number;
+  estimated_close_probability: number;
+  talking_points: string[] | null;
+  objection_responses: Record<string, string> | null;
+  generated_at: string | null;
+}
+
+export async function fetchSalesInsights(businessId: number): Promise<SalesInsight | null> {
+  const raw = await apiFetch<unknown>(`/businesses/${businessId}/sales-insights`);
+  return raw as SalesInsight | null;
+}
+
+// ---------------------------------------------------------------------------
+// Workspace
+// ---------------------------------------------------------------------------
+
+export interface WorkspaceStats {
+  calls_today: number;
+  follow_ups_today: number;
+  follow_ups_overdue: number;
+  hot_leads: number;
+  in_negotiation: number;
+  proposals_waiting: number;
+  won_today: number;
+  lost_today: number;
+  total_pipeline_value: number;
+  calls_this_week: number;
+  calls_last_week: number;
+  win_rate: number;
+  avg_response_time_hours: number;
+  calls_to_interested_rate: number;
+  interested_to_proposal_rate: number;
+  proposal_to_won_rate: number;
+  top_category: string;
+  overdue_follow_ups_pct: number;
+}
+
+export async function fetchWorkspaceStats(): Promise<WorkspaceStats> {
+  return apiFetch<WorkspaceStats>("/workspace/stats");
+}
+
+export async function fetchHotLeads(): Promise<Business[]> {
+  const raw = await apiFetch<unknown>("/workspace/hot-leads");
+  if (!Array.isArray(raw)) return [];
+  return (raw as unknown[]).map(normalizeBusiness);
 }

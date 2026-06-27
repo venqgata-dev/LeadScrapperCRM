@@ -21,7 +21,12 @@ import {
   Zap, DollarSign, MapPin, Tag, Globe, Settings2,
 } from "lucide-react";
 
-// ─── Shared constants (mirrors page.tsx) ──────────────────────────────────────
+// ─── Shared constants ─────────────────────────────────────────────────────────
+
+import {
+  UK_CATEGORY_GROUPS, BULGARIA_CATEGORY_GROUPS as BG_CATEGORY_GROUPS,
+  MAJOR_CITIES, SMALL_TOWNS, type CategoryGroup,
+} from "@/lib/category-data";
 
 const COUNTRIES = ["United Kingdom", "Bulgaria"] as const;
 
@@ -30,45 +35,6 @@ const PROVIDERS = [
   { id: "yell",         label: "Yell.com",         note: "Free · UK only" },
   { id: "thomson_local",label: "Thomson Local",     note: "Free · UK only" },
   { id: "freeindex",    label: "FreeIndex",         note: "Free · UK only" },
-];
-
-const MAJOR_CITIES: Record<string, string[]> = {
-  "United Kingdom": ["London","Manchester","Birmingham","Leeds","Liverpool","Bristol","Sheffield","Glasgow","Edinburgh","Cardiff"],
-  "Bulgaria":       ["Sofia","Varna","Plovdiv","Burgas","Ruse","Stara Zagora","Pleven","Sliven"],
-};
-
-const SMALL_TOWNS: Record<string, string[]> = {
-  "United Kingdom": ["Rochdale","Bolton","Oldham","Wigan","Stockport","Slough","Reading","Luton"],
-  "Bulgaria":       ["Перник","Дупница","Самоков","Казанлък","Търговище","Габрово","Ловеч","Видин"],
-};
-
-interface CategoryGroup { group: string; key: string; categories: string[] }
-
-const UK_CATEGORY_GROUPS: CategoryGroup[] = [
-  { group:"Home Services", key:"home_services", categories:["Plumber","Emergency Plumber","Boiler Repair","Gas Engineer","Heating Engineer","Electrician","Builder","Roofer","Carpenter","Kitchen Fitter","Bathroom Installer","Painter & Decorator","Plasterer","Landscaper","Gardener","Tree Surgeon","Locksmith","Handyman","Pest Control","Window Cleaner","Chimney Sweep"] },
-  { group:"Automotive",    key:"automotive",    categories:["Mechanic","Mobile Mechanic","Auto Repair","Car Wash","Car Detailing","MOT Centre","Tyre Shop","Body Shop","Windscreen Repair"] },
-  { group:"Beauty & Wellness", key:"beauty",   categories:["Hair Salon","Barber","Beauty Salon","Nail Salon","Tattoo Studio","Massage Therapist","Spa","Cosmetic Clinic"] },
-  { group:"Food & Hospitality", key:"food",    categories:["Restaurant","Cafe","Bakery","Pizza","Coffee Shop","Fish & Chips","Pub","Bar","Chinese Takeaway","Indian Restaurant","Takeaway","Hotel","Bed & Breakfast"] },
-  { group:"Professional Services", key:"professional", categories:["Accountant","Solicitor","Estate Agent","Mortgage Broker","IT Support","Marketing Agency","Web Designer","Architect","Surveyor"] },
-  { group:"Education",     key:"education",    categories:["Driving School","Tutor","Nursery","Music School","Language School","Dance School"] },
-  { group:"Health & Medical", key:"health",    categories:["Dentist","Physiotherapist","Chiropractor","Optician","Pharmacy","Osteopath","Psychologist","Counsellor"] },
-  { group:"Pets",          key:"pets",         categories:["Dog Groomer","Veterinary Clinic","Pet Shop","Dog Walker","Dog Trainer"] },
-  { group:"Fitness",       key:"fitness",      categories:["Gym","Personal Trainer","Yoga Studio","Pilates Studio","Boxing Club","Martial Arts","CrossFit"] },
-  { group:"Cleaning",      key:"cleaning",     categories:["Cleaning Services","Carpet Cleaner","End of Tenancy Cleaning","Oven Cleaning","Commercial Cleaning"] },
-  { group:"Construction",  key:"construction", categories:["Skip Hire","Scaffolding","CCTV Installation","Double Glazing","Loft Conversion","Extension Builder","Solar Panels"] },
-  { group:"Events & Photography", key:"events",categories:["Wedding Photographer","Event Planner","Catering","Wedding Venue","DJ","Videographer"] },
-  { group:"Retail",        key:"retail",       categories:["Jeweller","Florist","Furniture Shop","Clothing Boutique","Gift Shop","Antiques Shop"] },
-];
-
-const BG_CATEGORY_GROUPS: CategoryGroup[] = [
-  { group:"Home Services", key:"home_services", categories:["ВиК","Водопроводчик","Електротехник","Строителни услуги","Майстор","Покриви","Боядисване","Почистване"] },
-  { group:"Automotive",    key:"automotive",    categories:["Автосервиз","Автомивка","Детайлинг","Гуми"] },
-  { group:"Beauty",        key:"beauty",        categories:["Фризьор","Маникюр","Козметик","Масаж","Спа"] },
-  { group:"Food",          key:"food",          categories:["Ресторант","Пицария","Кафене","Сладкарница"] },
-  { group:"Health",        key:"health",        categories:["Зъболекар","Физиотерапия","Оптика","Аптека"] },
-  { group:"Professional",  key:"professional",  categories:["Счетоводител","Адвокат","Имоти"] },
-  { group:"Fitness",       key:"fitness",       categories:["Фитнес","Йога"] },
-  { group:"Pets",          key:"pets",          categories:["Ветеринар","Зоомагазин"] },
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

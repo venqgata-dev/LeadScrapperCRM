@@ -39,6 +39,44 @@ class BusinessRead(BaseModel):
     proposal_sent_at: datetime | None = None
     called_at: datetime | None = None
     won_at: datetime | None = None
+    # Website analysis
+    website_platform: str | None = None
+    website_health_score: int | None = None
+    website_last_analyzed: datetime | None = None
+    website_mobile_friendly: bool | None = None
+    website_https: bool | None = None
+    website_seo_score: int | None = None
+    website_redesign_score: int | None = None
+    website_load_time_ms: int | None = None
+    website_cms: str | None = None
+    website_has_analytics: bool | None = None
+    website_has_contact_form: bool | None = None
+    website_has_meta_description: bool | None = None
+    website_wordpress: bool | None = None
+    website_shopify: bool | None = None
+    website_wix: bool | None = None
+    website_has_gtm: bool | None = None
+    website_has_fb_pixel: bool | None = None
+    redesign_reasons: str | None = None
+    # AI scoring
+    ai_score: int | None = None
+    ai_priority: str | None = None
+    ai_project_value: int | None = None
+    ai_close_prob: int | None = None
+    # Enrichment
+    enrichment_status: str | None = None
+    last_enriched_at: datetime | None = None
+    # Social
+    fb_followers: int | None = None
+    ig_followers: int | None = None
+    facebook_found: bool | None = None
+    instagram_found: bool | None = None
+    # Extra links
+    youtube_url: str | None = None
+    tiktok_url: str | None = None
+    whatsapp_url: str | None = None
+    contact_form_url: str | None = None
+    search_campaign_id: int | None = None
     created_at: datetime
     updated_at: datetime
 

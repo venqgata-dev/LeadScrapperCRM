@@ -81,7 +81,17 @@
       "PowerShell(Invoke-RestMethod -Uri \"http://localhost:8000/cloudtalk/sync-contact/1\" -Method POST -TimeoutSec 20)",
       "PowerShell(Invoke-RestMethod -Uri \"http://localhost:8000/cloudtalk/calls/1\" -TimeoutSec 10)",
       "PowerShell(docker compose exec -T backend python -c \"from app.core.config import get_settings; s = get_settings\\(\\); print\\(f'agent_id={s.cloudtalk_agent_id}'\\)\")",
-      "PowerShell(docker compose exec -T postgres psql -U postgres -d leadcrm -c \"\\\\dt search_campaigns\" 2>&1)"
+      "PowerShell(docker compose exec -T postgres psql -U postgres -d leadcrm -c \"\\\\dt search_campaigns\" 2>&1)",
+      "Bash(dir /s \"C:\\\\Users\\\\User\\\\Documents\\\\leadscrapper\")",
+      "PowerShell(Head -50)",
+      "PowerShell(Invoke-RestMethod \"http://localhost:8000/health\")",
+      "PowerShell(Invoke-RestMethod \"http://localhost:3000\")",
+      "PowerShell(cd C:\\\\Users\\\\User\\\\Documents\\\\leadscrapper; docker compose up -d backend 2>&1 | Select-Object -Last 3; Start-Sleep -Seconds 8; Invoke-RestMethod \"http://localhost:8000/health\"; Invoke-RestMethod \"http://localhost:8000/playbooks\" | Select-Object -First 3 | ForEach-Object { $_.name })",
+      "PowerShell(docker compose logs leadscrapper-backend-1 2>&1)",
+      "PowerShell(Start-Sleep -Seconds 8; Invoke-RestMethod \"http://localhost:8000/health\"; \\(Invoke-RestMethod \"http://localhost:8000/playbooks\"\\).Count)",
+      "PowerShell(Invoke-RestMethod \"http://localhost:8000/workspace/stats\")",
+      "PowerShell(Invoke-RestMethod \"http://localhost:8000/playbooks\")",
+      "PowerShell(\\(Invoke-RestMethod \"http://localhost:8000/playbooks\"\\).Count; \\(Invoke-RestMethod \"http://localhost:8000/playbooks\"\\)[0].name)"
     ]
   }
 }

@@ -73,6 +73,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <span className="mx-2 text-slate-200">|</span>
 
                 <a
+                  href="/workspace"
+                  className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors whitespace-nowrap"
+                >
+                  Workspace
+                </a>
+                <a
+                  href="/playbooks"
+                  className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors whitespace-nowrap"
+                >
+                  Playbooks
+                </a>
+
+                <span className="mx-2 text-slate-200">|</span>
+
+                <a
                   href="/settings"
                   className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors whitespace-nowrap"
                 >
