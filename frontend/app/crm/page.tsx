@@ -12,34 +12,13 @@ import {
   type RevenueByMonth,
 } from "@/lib/api";
 import { formatCurrency } from "@/lib/utils";
+import { StatCard } from "@/components/ui";
 import {
-  Phone, TrendingUp, Star, FileText, Trophy, Banknote,
-  Target, Globe, BarChart2, MapPin, ArrowRight,
+  Phone, TrendingUp, Star, FileText, Trophy,
+  Target, Globe, BarChart2, MapPin,
 } from "lucide-react";
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
-
-function StatCard({
-  label, value, sub, icon: Icon, accent,
-}: {
-  label: string; value: string | number; sub?: string;
-  icon: React.ElementType; accent: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm font-medium text-slate-500">{label}</p>
-          <p className="mt-1 text-3xl font-bold text-slate-900">{value}</p>
-          {sub && <p className="mt-0.5 text-xs text-slate-400">{sub}</p>}
-        </div>
-        <div className={`rounded-xl p-2.5 ${accent}`}>
-          <Icon className="h-5 w-5" />
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function FunnelCard({
   label, value, color,
@@ -427,19 +406,19 @@ export default function CrmDashboardPage() {
       {/* ── Pipeline stats ── */}
       <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-500">Sales Pipeline</h2>
       <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Calls Today" value={stats?.calls_today ?? "—"} icon={Phone} accent="bg-blue-50 text-blue-600" />
-        <StatCard label="Interested" value={stats?.interested ?? "—"} sub="replied positively" icon={Star} accent="bg-purple-50 text-purple-600" />
-        <StatCard label="Proposals Sent" value={stats?.proposals_sent ?? "—"} sub="awaiting decision" icon={FileText} accent="bg-indigo-50 text-indigo-600" />
-        <StatCard label="Deals Won" value={stats?.deals_won ?? "—"} sub="this pipeline" icon={Trophy} accent="bg-green-50 text-green-600" />
+        <StatCard label="Calls Today" value={stats?.calls_today ?? "—"} icon={Phone} color="blue" />
+        <StatCard label="Interested" value={stats?.interested ?? "—"} subLabel="replied positively" icon={Star} color="purple" />
+        <StatCard label="Proposals Sent" value={stats?.proposals_sent ?? "—"} subLabel="awaiting decision" icon={FileText} color="purple" />
+        <StatCard label="Deals Won" value={stats?.deals_won ?? "—"} subLabel="this pipeline" icon={Trophy} color="green" />
       </div>
 
       {/* ── Opportunity pool ── */}
       <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-500">Opportunity Pool</h2>
       <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Total Opportunities" value={stats?.total_opportunities ?? "—"} sub="no proper website" icon={Target} accent="bg-slate-100 text-slate-600" />
-        <StatCard label="No Website" value={stats?.no_website ?? "—"} icon={Globe} accent="bg-red-50 text-red-600" />
-        <StatCard label="Facebook Only" value={stats?.facebook_only ?? "—"} icon={TrendingUp} accent="bg-orange-50 text-orange-600" />
-        <StatCard label="Free Builder" value={stats?.free_builder ?? "—"} sub="Wix / Weebly" icon={Globe} accent="bg-amber-50 text-amber-600" />
+        <StatCard label="Total Opportunities" value={stats?.total_opportunities ?? "—"} subLabel="no proper website" icon={Target} color="slate" />
+        <StatCard label="No Website" value={stats?.no_website ?? "—"} icon={Globe} color="red" />
+        <StatCard label="Facebook Only" value={stats?.facebook_only ?? "—"} icon={TrendingUp} color="amber" />
+        <StatCard label="Free Builder" value={stats?.free_builder ?? "—"} subLabel="Wix / Weebly" icon={Globe} color="amber" />
       </div>
 
       {/* ── Quick links ── */}

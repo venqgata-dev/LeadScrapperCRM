@@ -6,7 +6,7 @@ import {
   searchLeads,
   importBatch,
   previewCsv,
-  type DashboardStats,
+  type CrmDashboardStats as DashboardStats,
   type SearchResultLead,
   type SearchAnalytics,
   type ImportResult,

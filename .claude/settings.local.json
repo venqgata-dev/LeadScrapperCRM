@@ -91,7 +91,14 @@
       "PowerShell(Start-Sleep -Seconds 8; Invoke-RestMethod \"http://localhost:8000/health\"; \\(Invoke-RestMethod \"http://localhost:8000/playbooks\"\\).Count)",
       "PowerShell(Invoke-RestMethod \"http://localhost:8000/workspace/stats\")",
       "PowerShell(Invoke-RestMethod \"http://localhost:8000/playbooks\")",
-      "PowerShell(\\(Invoke-RestMethod \"http://localhost:8000/playbooks\"\\).Count; \\(Invoke-RestMethod \"http://localhost:8000/playbooks\"\\)[0].name)"
+      "PowerShell(\\(Invoke-RestMethod \"http://localhost:8000/playbooks\"\\).Count; \\(Invoke-RestMethod \"http://localhost:8000/playbooks\"\\)[0].name)",
+      "Bash(cmd /c \"tree /f\")",
+      "Bash(dir /s /b)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\User\\\\Documents\\\\leadscrapper\" -Recurse -Force | Select-Object FullName | ForEach-Object { $_.FullName -replace [regex]::Escape\\(\"C:\\\\Users\\\\User\\\\Documents\\\\leadscrapper\"\\), \"\" } | Sort-Object)",
+      "Bash(npm run *)",
+      "PowerShell($env:PATH = $env:PATH + \";C:\\\\Program Files\\\\nodejs\"; cd C:\\\\Users\\\\User\\\\Documents\\\\leadscrapper\\\\frontend; node --version)",
+      "PowerShell(Get-Command node, npm, pnpm, yarn -ErrorAction SilentlyContinue)",
+      "Bash(which node *)"
     ]
   }
 }

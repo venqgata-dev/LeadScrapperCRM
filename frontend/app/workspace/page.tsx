@@ -4,19 +4,25 @@ import { useEffect, useState } from "react";
 import {
   fetchWorkspaceStats,
   fetchHotLeads,
+  fetchBusinesses,
+  fetchPlaybooks,
   type WorkspaceStats,
   type Business,
+  type SalesPlaybook,
 } from "@/lib/api";
 import { formatCurrency } from "@/lib/utils";
 import { StatCard, KpiTile, LoadingSkeleton, ErrorCard, EmptyState } from "@/components/ui";
 import {
   Phone, Users, TrendingUp, DollarSign, AlertCircle, Calendar,
-  CheckCircle, XCircle, Flame, FileText, BarChart2
+  CheckCircle, XCircle, Flame, FileText, BarChart2, BookOpen, ChevronDown, ChevronUp,
 } from "lucide-react";
 
 export default function WorkspacePage() {
   const [stats, setStats] = useState<WorkspaceStats | null>(null);
   const [hotLeads, setHotLeads] = useState<Business[]>([]);
+  const [dueToday, setDueToday] = useState<Business[]>([]);
+  const [playbooks, setPlaybooks] = useState<SalesPlaybook[]>([]);
+  const [expandedPb, setExpandedPb] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,9 +30,22 @@ export default function WorkspacePage() {
     setLoading(true);
     setError(null);
     try {
-      const [s, h] = await Promise.all([fetchWorkspaceStats(), fetchHotLeads()]);
+      const todayStr = new Date().toISOString().split("T")[0];
+      const [s, h, allFollowUp, pbs] = await Promise.all([
+        fetchWorkspaceStats(),
+        fetchHotLeads(),
+        fetchBusinesses({ contact_status: "FOLLOW_UP" }),
+        fetchPlaybooks(true),
+      ]);
       setStats(s);
       setHotLeads(h);
+      setPlaybooks(pbs);
+      // Filter to leads with follow_up_date today or overdue
+      const due = allFollowUp.filter((b) => {
+        if (!b.follow_up_date) return false;
+        return b.follow_up_date.split("T")[0] <= todayStr;
+      });
+      setDueToday(due.slice(0, 10));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load workspace data");
     } finally {
@@ -133,6 +152,90 @@ export default function WorkspacePage() {
           </div>
         </div>
       </section>
+
+      {/* Today's Follow-ups */}
+      {dueToday.length > 0 && (
+        <section>
+          <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">
+            Due for a Call
+            <span className="ml-2 rounded-full bg-red-100 text-red-700 px-2 py-0.5 text-xs">{dueToday.length}</span>
+          </h2>
+          <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden bg-white">
+            {dueToday.map((b) => {
+              const overdue = b.follow_up_date && b.follow_up_date.split("T")[0] < new Date().toISOString().split("T")[0];
+              return (
+                <div key={b.id} className="flex items-center gap-4 px-4 py-3 hover:bg-slate-50 transition-colors">
+                  <Calendar className={`h-4 w-4 shrink-0 ${overdue ? "text-red-500" : "text-amber-500"}`} />
+                  <div className="flex-1 min-w-0">
+                    <a href={`/leads/${b.id}`} className="font-medium text-slate-900 hover:text-blue-600 text-sm">{b.name}</a>
+                    <p className="text-xs text-slate-500">{b.city} · {b.category}</p>
+                  </div>
+                  {overdue && (
+                    <span className="text-xs font-semibold bg-red-100 text-red-700 rounded-full px-2 py-0.5">Overdue</span>
+                  )}
+                  {b.phone && (
+                    <a href={`tel:${b.phone}`} className="text-blue-600 hover:text-blue-800">
+                      <Phone className="h-4 w-4" />
+                    </a>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* Active Playbooks */}
+      {playbooks.length > 0 && (
+        <section>
+          <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">
+            Active Playbooks
+          </h2>
+          <div className="space-y-2">
+            {playbooks.map((pb) => {
+              const isOpen = expandedPb.has(pb.id);
+              return (
+                <div key={pb.id} className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+                  <button
+                    className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50 transition-colors"
+                    onClick={() => setExpandedPb((prev) => {
+                      const next = new Set(prev);
+                      if (next.has(pb.id)) next.delete(pb.id); else next.add(pb.id);
+                      return next;
+                    })}
+                  >
+                    <BookOpen className="h-4 w-4 text-amber-500 shrink-0" />
+                    <span className="flex-1 font-medium text-slate-900 text-sm">{pb.name}</span>
+                    {pb.applies_to.length > 0 && (
+                      <span className="text-xs text-slate-500 hidden sm:inline">{pb.applies_to.slice(0, 3).join(", ")}</span>
+                    )}
+                    {isOpen ? <ChevronUp className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-400" />}
+                  </button>
+                  {isOpen && (
+                    <div className="border-t border-slate-100 px-4 py-3 bg-slate-50 space-y-2 text-sm">
+                      {pb.opening && (
+                        <div>
+                          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Opening</p>
+                          <p className="text-slate-700">{pb.opening}</p>
+                        </div>
+                      )}
+                      {pb.questions.length > 0 && (
+                        <div>
+                          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Key Questions</p>
+                          <ul className="space-y-0.5">
+                            {pb.questions.slice(0, 5).map((q, i) => <li key={i} className="text-slate-700">• {q}</li>)}
+                          </ul>
+                        </div>
+                      )}
+                      <a href="/playbooks" className="inline-block text-xs text-blue-600 hover:underline mt-1">View all playbooks →</a>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* Quick Actions */}
       <section>

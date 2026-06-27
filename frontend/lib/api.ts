@@ -125,8 +125,6 @@ export interface MarketAnalytics {
   revenue_won: number;
 }
 
-// Legacy alias
-export type DashboardStats = CrmDashboardStats;
 
 export interface CallLog {
   id: number;
