@@ -4,11 +4,18 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db
-from app.db.session import SessionLocal
+from app.db.session import get_db
 from app.models.business import Business
-from app.models.outreach import CallScript, EmailHistory, EmailTemplate, FollowUp, SalesCampaign, SalesTask
+
 from app.models.sales_insight import SalesInsight
+from app.models.call_script import CallScript
+from app.models.outreach import (
+    EmailHistory,
+    EmailTemplate,
+    FollowUp,
+    SalesCampaign,
+    SalesTask,
+)
 from app.schemas.outreach import (
     CallScriptRead,
     EmailHistoryRead,
