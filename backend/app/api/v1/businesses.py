@@ -41,6 +41,55 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
+@router.get("/analytics/website")
+def get_website_analytics(db: Annotated[Session, Depends(get_db)]) -> dict:
+    from sqlalchemy import func, case
+    from app.models.business import Business
+    from app.core.enums import WebsiteStatus as WS
+    try:
+        q = db.query(Business)
+        total = q.count()
+        has_website = q.filter(Business.website_status == WS.HAS_WEBSITE).count()
+        no_website = q.filter(Business.website_status == WS.NO_WEBSITE).count()
+        facebook_only = q.filter(Business.website_status == WS.FACEBOOK_ONLY).count()
+        free_builder = q.filter(Business.website_status == WS.FREE_BUILDER).count()
+        broken = q.filter(Business.website_status == WS.BROKEN_WEBSITE).count()
+        avg_health = db.query(func.avg(Business.website_health_score)).scalar() or 0
+        avg_seo = db.query(func.avg(Business.website_seo_score)).scalar() or 0
+        avg_redesign = db.query(func.avg(Business.website_redesign_score)).scalar() or 0
+        opportunity_rate = round((no_website + facebook_only + free_builder + broken) / total * 100, 1) if total else 0
+        # Platform distribution
+        platform_rows = (
+            db.query(Business.website_platform, func.count(Business.id))
+            .filter(Business.website_platform.isnot(None))
+            .group_by(Business.website_platform)
+            .all()
+        )
+        platform_distribution = {row[0]: row[1] for row in platform_rows}
+        return {
+            "total": total,
+            "has_website": has_website,
+            "no_website": no_website,
+            "facebook_only": facebook_only,
+            "free_builder": free_builder,
+            "broken_website": broken,
+            "avg_health_score": round(float(avg_health), 1),
+            "avg_seo_score": round(float(avg_seo), 1),
+            "avg_redesign_score": round(float(avg_redesign), 1),
+            "opportunity_rate": opportunity_rate,
+            "platform_distribution": platform_distribution,
+            "wordpress_count": q.filter(Business.website_wordpress.is_(True)).count(),
+            "shopify_count": q.filter(Business.website_shopify.is_(True)).count(),
+            "wix_count": q.filter(Business.website_wix.is_(True)).count(),
+            "mobile_friendly_count": q.filter(Business.website_mobile_friendly.is_(True)).count(),
+            "https_count": q.filter(Business.website_https.is_(True)).count(),
+            "has_analytics_count": q.filter(Business.website_has_analytics.is_(True)).count(),
+        }
+    except SQLAlchemyError as exc:
+        logger.exception("Failed to get website analytics")
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Database error") from exc
+
+
 @router.get("/analytics/revenue-by-month", response_model=list[RevenueByMonth])
 def get_revenue_months(db: Annotated[Session, Depends(get_db)]) -> list[RevenueByMonth]:
     try:

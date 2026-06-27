@@ -157,6 +157,10 @@ export interface BusinessFilters {
   has_phone?: boolean;
   has_email?: boolean;
   contact_status?: ContactStatus;
+  page?: number;
+  page_size?: number;
+  sort_by?: string;
+  sort_dir?: "asc" | "desc";
 }
 
 export interface SearchResultLead {
@@ -803,4 +807,521 @@ export async function fetchHotLeads(): Promise<Business[]> {
   const raw = await apiFetch<unknown>("/workspace/hot-leads");
   if (!Array.isArray(raw)) return [];
   return (raw as unknown[]).map(normalizeBusiness);
+}
+
+// ─── Website Analytics ────────────────────────────────────────────────────────
+
+export interface WebsiteAnalyticsStats {
+  total: number;
+  has_website: number;
+  no_website: number;
+  facebook_only: number;
+  free_builder: number;
+  broken_website: number;
+  avg_health_score: number;
+  avg_seo_score: number;
+  avg_redesign_score: number;
+  opportunity_rate: number;
+  platform_distribution: Record<string, number>;
+  wordpress_count: number;
+  shopify_count: number;
+  wix_count: number;
+  mobile_friendly_count: number;
+  https_count: number;
+  has_analytics_count: number;
+}
+
+export async function fetchWebsiteAnalytics(): Promise<WebsiteAnalyticsStats> {
+  return apiFetch<WebsiteAnalyticsStats>("/businesses/analytics/website");
+}
+
+// ─── Sales Intelligence batch control ─────────────────────────────────────────
+
+export interface SalesInsightBatchStatus {
+  running: boolean;
+  paused: boolean;
+  total: number;
+  processed: number;
+  errors: number;
+  elapsed_seconds: number;
+  current_business: string | null;
+  total_businesses: number;
+  insights_generated: number;
+  hot_count: number;
+  warm_count: number;
+  avg_overall_score: number;
+  avg_project_value: number;
+}
+
+export async function fetchSalesInsightStatus(): Promise<SalesInsightBatchStatus> {
+  return apiFetch<SalesInsightBatchStatus>("/sales-insights/status/current");
+}
+export async function generateAllSalesInsights(): Promise<{ started: boolean }> {
+  return apiFetch<{ started: boolean }>("/sales-insights/generate-all", { method: "POST" });
+}
+export async function generateMissingSalesInsights(): Promise<{ started: boolean }> {
+  return apiFetch<{ started: boolean }>("/sales-insights/generate-missing", { method: "POST" });
+}
+export async function pauseSalesInsights(): Promise<void> {
+  await apiFetch<void>("/sales-insights/pause", { method: "POST" });
+}
+export async function resumeSalesInsights(): Promise<void> {
+  await apiFetch<void>("/sales-insights/resume", { method: "POST" });
+}
+export async function stopSalesInsights(): Promise<void> {
+  await apiFetch<void>("/sales-insights/stop", { method: "POST" });
+}
+
+// ─── Outreach Campaigns ───────────────────────────────────────────────────────
+
+export interface SalesCampaign {
+  id: number;
+  name: string;
+  description: string | null;
+  campaign_type: string;
+  status: string;
+  country: string | null;
+  category: string | null;
+  min_ai_score: number;
+  min_project_value: number;
+  min_close_probability: number;
+  target_count: number;
+  contacted_count: number;
+  replied_count: number;
+  booked_count: number;
+  task_count: number;
+  pending_tasks: number;
+  completed_tasks: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SalesCampaignCreate {
+  name: string;
+  description?: string | null;
+  campaign_type?: string;
+  country?: string | null;
+  category?: string | null;
+  min_ai_score?: number;
+  min_project_value?: number;
+  min_close_probability?: number;
+  max_businesses?: number;
+}
+
+export interface OutreachAnalytics {
+  total_campaigns: number;
+  active_campaigns: number;
+  total_tasks: number;
+  completed_tasks: number;
+  pending_tasks: number;
+  tasks_today: number;
+  scripts_generated: number;
+  emails_drafted: number;
+  follow_ups_pending: number;
+  calls_made: number;
+  emails_sent: number;
+  replies_received: number;
+  bookings_made: number;
+  conversion_rate: number;
+}
+
+export interface ScriptBatchStatus {
+  running: boolean;
+  paused: boolean;
+  total: number;
+  processed: number;
+  errors: number;
+  elapsed_seconds: number;
+  current_business: string | null;
+  scripts_generated: number;
+  emails_generated: number;
+}
+
+export async function fetchOutreachCampaigns(): Promise<SalesCampaign[]> {
+  return apiFetch<SalesCampaign[]>("/outreach/campaigns");
+}
+export async function createOutreachCampaign(payload: SalesCampaignCreate): Promise<SalesCampaign> {
+  return apiFetch<SalesCampaign>("/outreach/campaigns", { method: "POST", body: JSON.stringify(payload) });
+}
+export async function deleteOutreachCampaign(id: number): Promise<void> {
+  await apiFetch<void>("/outreach/campaigns/${id}", { method: "DELETE" });
+}
+export async function fetchOutreachAnalytics(): Promise<OutreachAnalytics> {
+  return apiFetch<OutreachAnalytics>("/outreach/analytics");
+}
+export async function fetchScriptBatchStatus(): Promise<ScriptBatchStatus> {
+  return apiFetch<ScriptBatchStatus>("/outreach/scripts/status/current");
+}
+export async function generateAllScripts(includeEmails = false): Promise<{ started: boolean }> {
+  return apiFetch<{ started: boolean }>("/outreach/scripts/generate-all?include_emails=" + includeEmails, { method: "POST" });
+}
+export async function generateMissingScripts(includeEmails = false): Promise<{ started: boolean }> {
+  return apiFetch<{ started: boolean }>("/outreach/scripts/generate-missing?include_emails=" + includeEmails, { method: "POST" });
+}
+export async function pauseScripts(): Promise<void> {
+  await apiFetch<void>("/outreach/scripts/pause", { method: "POST" });
+}
+export async function resumeScripts(): Promise<void> {
+  await apiFetch<void>("/outreach/scripts/resume", { method: "POST" });
+}
+export async function stopScripts(): Promise<void> {
+  await apiFetch<void>("/outreach/scripts/stop", { method: "POST" });
+}
+
+// ─── Activity ─────────────────────────────────────────────────────────────────
+
+export interface Activity {
+  id: number;
+  event_type: string;
+  business_id: number | null;
+  business_name: string | null;
+  title: string;
+  description: string | null;
+  meta: Record<string, unknown> | null;
+  created_at: string;
+}
+
+export interface ActivityCreate {
+  event_type: string;
+  business_id?: number | null;
+  business_name?: string | null;
+  title: string;
+  description?: string | null;
+  meta?: Record<string, unknown> | null;
+}
+
+export async function fetchActivities(params?: { business_id?: number; event_type?: string; limit?: number }): Promise<Activity[]> {
+  const p = new URLSearchParams();
+  if (params?.business_id) p.set("business_id", String(params.business_id));
+  if (params?.event_type) p.set("event_type", params.event_type);
+  if (params?.limit) p.set("limit", String(params.limit));
+  const qs = p.toString();
+  return apiFetch<Activity[]>("/activities" + (qs ? "?" + qs : ""));
+}
+export async function createActivity(payload: ActivityCreate): Promise<Activity> {
+  return apiFetch<Activity>("/activities", { method: "POST", body: JSON.stringify(payload) });
+}
+
+// ─── Deals ────────────────────────────────────────────────────────────────────
+
+export interface Deal {
+  id: number;
+  business_id: number;
+  business_name: string | null;
+  deal_name: string;
+  salesperson: string | null;
+  status: string;
+  estimated_value: string | null;
+  probability: number | null;
+  expected_close_date: string | null;
+  actual_close_date: string | null;
+  lost_reason: string | null;
+  won_reason: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DealCreate {
+  deal_name: string;
+  salesperson?: string | null;
+  status?: string;
+  estimated_value?: number | null;
+  probability?: number | null;
+  expected_close_date?: string | null;
+  notes?: string | null;
+}
+
+export interface DealStats {
+  total: number;
+  open: number;
+  won: number;
+  lost: number;
+  cancelled: number;
+  won_this_month: number;
+  lost_this_month: number;
+  pipeline_value: number;
+  revenue_won_this_month: number;
+  total_pipeline: number;
+  total_won: number;
+  avg_deal_value: number;
+  win_rate: number;
+}
+
+export async function fetchDeals(filters?: { status?: string; salesperson?: string }): Promise<Deal[]> {
+  const p = new URLSearchParams();
+  if (filters?.status) p.set("status", filters.status);
+  if (filters?.salesperson) p.set("salesperson", filters.salesperson);
+  const qs = p.toString();
+  return apiFetch<Deal[]>("/deals" + (qs ? "?" + qs : ""));
+}
+export async function fetchDealStats(): Promise<DealStats> {
+  return apiFetch<DealStats>("/deals/stats");
+}
+export async function fetchBusinessDeals(businessId: number): Promise<Deal[]> {
+  return apiFetch<Deal[]>("/businesses/" + businessId + "/deals");
+}
+export async function createDeal(businessId: number, payload: DealCreate): Promise<Deal> {
+  return apiFetch<Deal>("/businesses/" + businessId + "/deals", { method: "POST", body: JSON.stringify(payload) });
+}
+export async function updateDeal(id: number, payload: Partial<Deal> | Partial<DealCreate>): Promise<Deal> {
+  return apiFetch<Deal>("/deals/" + id, { method: "PATCH", body: JSON.stringify(payload) });
+}
+export async function markDealWon(id: number, payload: { won_reason?: string | null; actual_close_date?: string | null; create_project?: boolean }): Promise<Deal> {
+  return apiFetch<Deal>("/deals/" + id + "/mark-won", { method: "POST", body: JSON.stringify(payload) });
+}
+export async function markDealLost(id: number, payload: { lost_reason: string; actual_close_date?: string | null }): Promise<Deal> {
+  return apiFetch<Deal>("/deals/" + id + "/mark-lost", { method: "POST", body: JSON.stringify(payload) });
+}
+export async function deleteDeal(id: number): Promise<void> {
+  await apiFetch<void>("/deals/" + id, { method: "DELETE" });
+}
+
+// ─── Projects ─────────────────────────────────────────────────────────────────
+
+export interface Project {
+  id: number;
+  business_id: number;
+  name: string;
+  package: string | null;
+  developer: string | null;
+  status: string;
+  priority: string;
+  expected_delivery: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProjectExtended extends Project {
+  designer: string | null;
+  project_manager: string | null;
+  start_date: string | null;
+  completion_pct: number;
+  deal_id: number | null;
+  total_value: string | null;
+  deposit: string | null;
+  paid_amount: string | null;
+  business_name: string | null;
+  [key: string]: unknown;
+}
+
+export interface ProjectStats {
+  total: number;
+  in_progress: number;
+  overdue: number;
+  completed: number;
+  by_status?: Record<string, number>;
+  due_this_week?: number;
+  avg_completion?: number;
+}
+
+export interface Deliverable {
+  id: number;
+  project_id: number;
+  name: string;
+  status: string;
+  assigned_to: string | null;
+  due_date: string | null;
+  completed_at: string | null;
+  notes: string | null;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProjectComment {
+  id: number;
+  project_id: number;
+  author: string;
+  body: string;
+  parent_id: number | null;
+  created_at: string;
+  updated_at: string;
+  replies: ProjectComment[];
+}
+
+export interface ClientCredential {
+  id: number;
+  project_id: number;
+  hosting_provider: string | null;
+  hosting_url: string | null;
+  hosting_user: string | null;
+  hosting_pass: string | null;
+  domain_name: string | null;
+  domain_registrar: string | null;
+  domain_expiry: string | null;
+  wp_admin_url: string | null;
+  wp_admin_user: string | null;
+  wp_admin_pass: string | null;
+  ftp_host: string | null;
+  ftp_user: string | null;
+  ftp_pass: string | null;
+  cpanel_url: string | null;
+  cpanel_user: string | null;
+  cloudflare_email: string | null;
+  cloudflare_zone: string | null;
+  ga_property_id: string | null;
+  gsc_property_url: string | null;
+  gbp_url: string | null;
+  facebook_url: string | null;
+  instagram_url: string | null;
+  linkedin_url: string | null;
+  other_notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function fetchAllProjects(params?: { status?: string; developer?: string }): Promise<ProjectExtended[]> {
+  const p = new URLSearchParams();
+  if (params?.status) p.set("status", params.status);
+  if (params?.developer) p.set("developer", params.developer);
+  const qs = p.toString();
+  const raw = await apiFetch<Project[]>("/projects" + (qs ? "?" + qs : ""));
+  return raw as ProjectExtended[];
+}
+export async function fetchProjectStats(): Promise<ProjectStats> {
+  return apiFetch<ProjectStats>("/projects/stats");
+}
+export async function fetchProjectById(id: number): Promise<ProjectExtended> {
+  return apiFetch<ProjectExtended>("/projects/" + id);
+}
+export async function updateProjectExt(id: number, payload: Partial<ProjectExtended>): Promise<ProjectExtended> {
+  return apiFetch<ProjectExtended>("/projects/" + id, { method: "PATCH", body: JSON.stringify(payload) });
+}
+export async function fetchDeliverables(projectId: number): Promise<Deliverable[]> {
+  return apiFetch<Deliverable[]>("/projects/" + projectId + "/deliverables");
+}
+export async function createDeliverable(projectId: number, payload: string | { name: string; status?: string; sort_order?: number }): Promise<Deliverable> {
+  const body = typeof payload === "string" ? { name: payload } : payload;
+  return apiFetch<Deliverable>("/projects/" + projectId + "/deliverables", { method: "POST", body: JSON.stringify(body) });
+}
+export async function updateDeliverable(id: number, payload: Partial<Deliverable>): Promise<Deliverable> {
+  return apiFetch<Deliverable>("/deliverables/" + id, { method: "PATCH", body: JSON.stringify(payload) });
+}
+export async function deleteDeliverable(id: number): Promise<void> {
+  await apiFetch<void>("/deliverables/" + id, { method: "DELETE" });
+}
+export async function fetchComments(projectId: number): Promise<ProjectComment[]> {
+  return apiFetch<ProjectComment[]>("/projects/" + projectId + "/comments");
+}
+export async function createComment(projectId: number, author: string | { author: string; body: string; parent_id?: number | null }, body?: string, parent_id?: number | null): Promise<ProjectComment> {
+  const payload = typeof author === "string" ? { author, body: body ?? "", parent_id: parent_id ?? null } : author;
+  return apiFetch<ProjectComment>("/projects/" + projectId + "/comments", { method: "POST", body: JSON.stringify(payload) });
+}
+export async function deleteComment(id: number): Promise<void> {
+  await apiFetch<void>("/comments/" + id, { method: "DELETE" });
+}
+export async function fetchCredentials(projectId: number): Promise<ClientCredential | null> {
+  try {
+    return await apiFetch<ClientCredential>("/projects/" + projectId + "/credentials");
+  } catch {
+    return null;
+  }
+}
+export async function upsertCredentials(projectId: number, payload: Partial<ClientCredential>): Promise<ClientCredential> {
+  return apiFetch<ClientCredential>("/projects/" + projectId + "/credentials", { method: "PUT", body: JSON.stringify(payload) });
+}
+
+// ─── Client Follow-ups ────────────────────────────────────────────────────────
+
+export interface ClientFollowUp {
+  id: number;
+  business_id: number;
+  business_name: string | null;
+  follow_up_date: string;
+  follow_up_time: string | null;
+  type: string;
+  priority: string;
+  status: string;
+  assigned_to: string | null;
+  notes: string | null;
+  reminder_sent: boolean;
+  completed_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FollowUpCreate {
+  business_id: number;
+  follow_up_date: string;
+  follow_up_time?: string | null;
+  type?: string;
+  priority?: string;
+  assigned_to?: string | null;
+  notes?: string | null;
+}
+
+export async function fetchFollowUps(params?: { status?: string; priority?: string; type?: string }): Promise<ClientFollowUp[]> {
+  const p = new URLSearchParams();
+  if (params?.status) p.set("status", params.status);
+  if (params?.priority) p.set("priority", params.priority);
+  if (params?.type) p.set("type", params.type);
+  const qs = p.toString();
+  return apiFetch<ClientFollowUp[]>("/followups" + (qs ? "?" + qs : ""));
+}
+export async function createFollowUp(payload: FollowUpCreate): Promise<ClientFollowUp> {
+  return apiFetch<ClientFollowUp>("/followups", { method: "POST", body: JSON.stringify(payload) });
+}
+export async function updateFollowUp(id: number, payload: Partial<FollowUpCreate & { status?: string }>): Promise<ClientFollowUp> {
+  return apiFetch<ClientFollowUp>("/followups/" + id, { method: "PATCH", body: JSON.stringify(payload) });
+}
+export async function deleteFollowUp(id: number): Promise<void> {
+  await apiFetch<void>("/followups/" + id, { method: "DELETE" });
+}
+
+// ─── Enrichment ───────────────────────────────────────────────────────────────
+
+export interface EnrichmentJobStatus {
+  running: boolean;
+  paused: boolean;
+  total: number;
+  processed: number;
+  emails_found: number;
+  facebook_found: number;
+  instagram_found: number;
+  linkedin_found: number;
+  youtube_found: number;
+  tiktok_found: number;
+  contact_forms_found: number;
+  errors: number;
+  retry_count: number;
+  eta_seconds: number | null;
+  rate_limit_delay: number;
+  elapsed_seconds: number;
+  current_business: string | null;
+  total_businesses: number;
+  with_facebook: number;
+  with_instagram: number;
+  with_email: number;
+}
+
+export interface EnrichmentStartResult {
+  started: boolean;
+  message: string;
+}
+
+export async function fetchEnrichmentStatus(): Promise<EnrichmentJobStatus> {
+  return apiFetch<EnrichmentJobStatus>("/enrichment/status");
+}
+export async function startEnrichmentAll(): Promise<EnrichmentStartResult> {
+  return apiFetch<EnrichmentStartResult>("/enrichment/start-all", { method: "POST" });
+}
+export async function startEnrichmentMissing(): Promise<EnrichmentStartResult> {
+  return apiFetch<EnrichmentStartResult>("/enrichment/start-missing", { method: "POST" });
+}
+export async function pauseEnrichment(): Promise<void> {
+  await apiFetch<void>("/enrichment/pause", { method: "POST" });
+}
+export async function resumeEnrichment(): Promise<void> {
+  await apiFetch<void>("/enrichment/resume", { method: "POST" });
+}
+export async function stopEnrichment(): Promise<void> {
+  await apiFetch<void>("/enrichment/stop", { method: "POST" });
+}
+
+// ─── Delete Business ──────────────────────────────────────────────────────────
+
+export async function deleteBusiness(id: number): Promise<void> {
+  await apiFetch<void>("/businesses/" + id, { method: "DELETE" });
 }
